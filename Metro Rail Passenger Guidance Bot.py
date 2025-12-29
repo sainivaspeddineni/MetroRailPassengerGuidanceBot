@@ -1,41 +1,28 @@
-# pip install streamlit google-genai
-
 import streamlit as st
 from google import genai
 from google.genai import types
 
-# -------------------------------
-# API KEY (LOCAL TESTING ONLY)
-# ⚠️ Regenerate after testing
-# -------------------------------
+
 GEMINI_API_KEY = "AIzaSyDDPNtgxNtYIRxw4OeyM3xjORajv6EQRsQ"
 
-# -------------------------------
-# STREAMLIT UI
-# -------------------------------
+
 st.set_page_config(page_title="Metro Guidance Bot", page_icon="🚇")
 st.title("🚇 Metro Rail Passenger Guidance Bot")
 st.caption("Informational assistance only • No ticketing or live operations")
 
-# -------------------------------
-# USER INPUT
-# -------------------------------
+
 user_input = st.text_area(
     "Ask a metro-related question:",
     placeholder="Explain metro ticket types"
 )
 
-# -------------------------------
-# BUTTON ACTION
-# -------------------------------
+
 if st.button("Ask Bot"):
     if not user_input.strip():
         st.error("Please enter a question.")
         st.stop()
 
-    # -------------------------------
-    # DOMAIN FILTER (STRICT)
-    # -------------------------------
+
     metro_keywords = [
         "metro", "train", "ticket", "platform", "station",
         "security", "entry", "exit", "gate", "coach",
@@ -50,17 +37,10 @@ if st.button("Ask Bot"):
         st.stop()
 
     try:
-        # -------------------------------
-        # GEMINI CLIENT
-        # -------------------------------
         client = genai.Client(api_key=GEMINI_API_KEY)
         model = "gemini-3-flash-preview"
 
-        # -------------------------------
-        # SYSTEM + USER PROMPTS
-        # -------------------------------
         contents = [
-            # SYSTEM PROMPT
             types.Content(
                 role="system",
                 parts=[
@@ -90,27 +70,17 @@ if st.button("Ask Bot"):
                     )
                 ],
             ),
-
-            # USER PROMPT
             types.Content(
                 role="user",
                 parts=[types.Part.from_text(text=user_input)],
             ),
         ]
-
-        # -------------------------------
-        # GENERATION CONFIG
-        # -------------------------------
         generate_content_config = types.GenerateContentConfig(
             temperature=0.25,
             thinking_config=types.ThinkingConfig(
                 thinking_level="HIGH"
             )
         )
-
-        # -------------------------------
-        # RESPONSE STREAM
-        # -------------------------------
         with st.spinner("Generating response..."):
             response_text = ""
             for chunk in client.models.generate_content_stream(
